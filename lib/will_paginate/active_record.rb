@@ -51,23 +51,23 @@ module WillPaginate
             offset_value + size
           else
             @total_entries_queried = true
-            result = count
+            result = self.uniq_value ? select(:id).count(:id, :distinct=>true) : count
             result = result.size if result.respond_to?(:size) and !result.is_a?(Integer)
             result
           end
         end
       end
 
-      def count
+      def count(column=nil, options={})
         if limit_value
           excluded = [:order, :limit, :offset]
           excluded << :includes unless eager_loading?
           rel = self.except(*excluded)
           # TODO: hack. decide whether to keep
           rel = rel.apply_finder_options(@wp_count_options) if defined? @wp_count_options
-          rel.count
+          rel.count(column, options)
         else
-          super
+          super(column, options)
         end
       end
 
